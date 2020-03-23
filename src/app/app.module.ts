@@ -8,14 +8,23 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { BatteryStatus } from '@ionic-native/battery-status/ngx';
+import { Network } from '@ionic-native/network/ngx';
+import { Diagnostic } from '@ionic-native/diagnostic/ngx';
+import { DeviceModule } from './device/device.module';
+import { Camera} from '@ionic-native/camera/ngx';
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule],
+  imports: [BrowserModule,DeviceModule, IonicModule.forRoot(), AppRoutingModule],
   providers: [
     StatusBar,
     SplashScreen,
+    BatteryStatus ,
+    Network,
+    Camera,
+    Diagnostic,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

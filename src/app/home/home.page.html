@@ -15,6 +15,42 @@
 
   <div id="container">
     <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+    <p>
+      Start with Ionic
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://ionicframework.com/docs/components"
+      >
+        UI Components
+      </a>
+    </p>
+
+    <div>Battery level {{batteryLevel}}</div>
+    <ion-button (click)=" check(50)" color="success">Battery 40</ion-button>
+
+    <ion-button (click)="stopBatteryCheck()" color="danger">
+      Battery stop
+    </ion-button>
+
+    <br />
+    <h3>Diagnostic</h3>
+    <ion-button (click)="camaraPreset()" color="success">
+      Camara Present
+    </ion-button>
+    <ion-button (click)="camaraAuth()" color="success">
+      Camara Authorized
+    </ion-button>
+    <p>Cam authorization: {{authorization}}</p>
+    <!-- <ion-button (click)="camaraStatus()" color="success">Camara Sta</ion-button>
+
+      <ion-button (click)="camaraR()" color="success">Camara R</ion-button> -->
+
+    <ion-button (click)="media2()" color="danger">Get media2</ion-button>
+    <ion-button (click)="foto()" color="danger">foto</ion-button>
+
+    <br />
+    <h3>Network</h3>
+    <ion-button (click)="conect('wifi')" color="success">Connect</ion-button>
   </div>
 </ion-content>
