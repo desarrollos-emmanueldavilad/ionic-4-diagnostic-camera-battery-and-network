@@ -27,24 +27,18 @@ class CameraMock {
       }
     });
   }
-
 }
 
-
-
-
 const platformMock = {
-  is: (platform) => {
-  switch (platform) {
-  case 'cordova':
-  return true;
-    default:
-    return false;
+  is: platform => {
+    switch (platform) {
+      case 'cordova':
+        return true;
+      default:
+        return false;
+    }
   }
-  }
- }
-
-
+};
 
 describe('DevicesStateService', () => {
   let service: DevicesStateService;
@@ -56,7 +50,7 @@ describe('DevicesStateService', () => {
         BatteryStatus,
         Network,
         { provide: Diagnostic, useClass: CameraMock },
-        {provide: Platform, useValue: platformMock}
+        { provide: Platform, useValue: platformMock }
       ]
     });
 
@@ -69,58 +63,26 @@ describe('DevicesStateService', () => {
 
   it('call requestCamera method', async () => {
     let res = await service.requestCamera();
-    console.log(res);
     expect(res).toEqual('GRANTED');
   });
 
   it('call diagnosticoCamara method for MOBILE', async () => {
     let ress = await service.diagnosticoCamara();
-    console.log('diagnosticoCamara()', ress);
     expect(ress).toEqual(true);
   });
 
   it('call camaraAuthorized method for MOBILE', async () => {
     let ress = await service.camaraAuthorized();
-    console.log('camaraAuthorized()', ress);
     expect(ress).toEqual(true);
   });
 });
 
-
-describe('DevicesStateService', () => {
-  let service: DevicesStateService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        DevicesStateService,
-        BatteryStatus,
-        Network,
-        { provide: Diagnostic, useClass: CameraMock },
-      ]
-    });
-
-    service = TestBed.get(DevicesStateService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-
-  it('call diagnosticoCamara for web', async () => {
-    let ress = await service.diagnosticoCamara();
-    console.log('diagnosticoCamara()', ress);
-    expect(ress).toEqual(true);
-  });
-
-});
 
 let m = 'offline';
 let signal: string = 'wifi';
 
 class NetworkMock {
-  public onConnect(): Observable<any> {
+  public onChange(): Observable<any> {
     return new Observable(observer => {
       observer.next('wifi');
       // observer.complete();
@@ -143,6 +105,32 @@ describe('DevicesStateService', () => {
       providers: [
         DevicesStateService,
         BatteryStatus,
+        Network,
+        { provide: Diagnostic, useClass: CameraMock }
+      ]
+    });
+
+    service = TestBed.get(DevicesStateService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('call diagnosticoCamara for web', async () => {
+    let ress = await service.diagnosticoCamara();
+    expect(ress).toEqual(true);
+  });
+});
+
+describe('DevicesStateService', () => {
+  let service: DevicesStateService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        DevicesStateService,
+        BatteryStatus,
         Diagnostic,
         { provide: Network, useClass: NetworkMock }
       ]
@@ -156,36 +144,28 @@ describe('DevicesStateService', () => {
   });
 
   it('call connect method for NETWORK', async () => {
-    await service.connect('wifi').subscribe(observer => {
+    await service.connectChange().subscribe(observer => {
       expect(observer.next(signal)).toEqual('wifi');
     });
   });
 
   it('call disconnect for NETWORK', async () => {
     await service.disconnect().subscribe(observer => {
-      console.log('disconect',observer)
       let a = observer;
-     expect(a).toEqual('offline');
+      expect(a).toEqual('offline');
     });
   });
 });
 
 class NetworkMockElse {
-  public onConnect(): Observable<any> {
+  public onChange(): Observable<any> {
     return new Observable(observer => {
-      observer.next();
+      observer.next(undefined);
       // observer.complete();
     });
   }
-
-  // public onDisconnect(): Observable<any> {
-  //   return new Observable(observer => {
-  //     observer.next('offline');
-  //     // observer.complete();
-  //   });
-  // }
 }
-
+let noNetwork = undefined;
 describe('DevicesStateService', () => {
   let service: DevicesStateService;
 
@@ -207,25 +187,21 @@ describe('DevicesStateService', () => {
   });
 
   it('call connect', async () => {
-    await service.connect('3g').subscribe(observer => {
-      expect(observer.next('3g')).toEqual('3g');
+    await service.connectChange().subscribe(observer => {
+      expect(observer.next(noNetwork)).toEqual(undefined);
     });
   });
 });
 
 let lvl: number = 75;
+let connect: boolean = false;
+let all: any = { lvl, connect };
 
 class BatteryStatusMock {
   public onChange(): Observable<any> {
     return new Observable(observer => {
-        observer.next(75);
-        observer.complete();
-    });
-  }
-
-  public onDisconnect(): Observable<any> {
-    return new Observable(observer => {
-      observer.next(undefined);
+      observer.next(all.lvl);
+      observer.complete();
     });
   }
 }
@@ -251,28 +227,27 @@ describe('DevicesStateService', () => {
   });
 
   it('call checkBattery', async () => {
-    await service.checkBattery1(lvl).subscribe(observer => {
-      expect(observer.next(lvl)).toEqual(75);
+    await service.checkBattery1(all).subscribe(observer => {
+      expect(observer.next(all.lvl)).toEqual(75);
     });
   });
 
   it('call stopBatteryCheck', async () => {
     await service.stopBatteryCheck().subscribe(observer => {
-      expect(observer.next(undefined)).toEqual(undefined);
+      expect(observer.next()).toEqual(undefined);
     });
   });
 });
 
-
+let un = undefined;
 class BatteryStatusMockElse {
   public onChange(): Observable<any> {
     return new Observable(observer => {
-        observer.next();
-        observer.complete();
+      observer.next(undefined);
     });
   }
 
-  public onDisconnect(): Observable<any> {
+  public stopBatteryCheck(): Observable<any> {
     return new Observable(observer => {
       observer.next(undefined);
     });
@@ -300,14 +275,14 @@ describe('DevicesStateService', () => {
 
   it('call checkBattery', async () => {
     await service.checkBattery1(lvl).subscribe(observer => {
-      expect(observer.next(lvl)).toEqual(75);
+      expect(observer.next(un)).toEqual(undefined);
     });
   });
 
   it('call stopBatteryCheck', async () => {
     await service.stopBatteryCheck().subscribe(observer => {
-      expect(observer.next(undefined)).toEqual(undefined);
+      let s = observer
+      expect(s).toEqual(undefined);
     });
   });
 });
-

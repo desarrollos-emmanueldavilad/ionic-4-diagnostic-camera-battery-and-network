@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DevicesStateService } from '../device/devices-state.service';
-import { identifierModuleUrl } from '@angular/compiler';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -9,75 +9,76 @@ import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 })
 export class HomePage implements OnInit {
   level: any;
-  stat: any;
-  batteryLevel = 45;
+  batteryLevel: any = {lvl: 65, plug: false};
   network: any;
+  nivel = 65;
   wifi = 'wifi';
-  bat: any;
   authorization: any;
+  camRq: any;
+  camPre: any;
 
   constructor(
-    private deviceService: DevicesStateService,
-    private camera: Camera
-  ) {}
+      private deviceService: DevicesStateService,
+      private camera: Camera,
+  ) {
+    console.log('constructor');
+  }
+
   ngOnInit() {
+    this.check();
     this.listen();
-    this.listenbat();
   }
 
-  ////////////////////////////////////////////BATERIA/////////////////////////////////////////////////
-  check(porcentaje: number) {
-    this.deviceService.checkBattery1(porcentaje).subscribe(res => {
-      console.log('cumpliendo', res);
-      if (res < this.batteryLevel) {
-        const element = document.getElementById('container');
-        element.style.background = '#FFFAF0';
-        alert(
-          'el status de tu bateria es bajo para obtener un performace de 100% en esta aplicación'
-        );
-      } else if (res => this.batteryLevel) {
-        const element = document.getElementById('container');
-        element.style.background = ' #FFFFF0';
-        alert('el status de tu bateria es perfecto para el en esta aplicación');
-      } else {
-        console.log('anything');
+  //////////////////////////////////////////// BATERIA/////////////////////////////////////////////////
+  check() {
+    this.deviceService.checkBattery1(this.batteryLevel).subscribe(res => {
+      console.log('NUEVA BATERIA', res.lvl);
+      if (res.lvl > this.nivel && res.plug == false) {
+        this.alertBattery();
+      } else if (res.lvl < this.nivel && res.plug == false) {
+        console.warn('performace de 50% en esta aplicación');
+        this.alertLowBattery();
       }
     });
   }
 
-  listenbat() {
-    this.deviceService.checkBattery1(this.batteryLevel).subscribe(data => {
-      if (data < this.batteryLevel) {
-        const element = document.getElementById('container');
-        element.style.background = '#FFFAF0';
-        console.log(
-          'el status de tu bateria es bajo para obtener un performace de 100% en esta aplicación'
-        );
-      } else if (data > this.batteryLevel) {
-        const element = document.getElementById('container');
-        element.style.background = ' #FFFFF0';
-        console.log(
-          'el status de tu bateria es perfecto para el en esta aplicación'
-        );
-      } else if (data == 100) {
-        this.stopBatteryCheck();
-      } else {
-        console.log('anything');
-      }
-    });
+
+  alertBattery() {
+    const elem = document.getElementById('bt');
+    elem.classList.add('noShow');
+    elem.classList.remove('show');
+    const elemt = document.getElementById('fotografia');
+    elemt.classList.remove('steal');
+    elemt.classList.add('noSteal');
   }
+
+
+  alertLowBattery() {
+    const elem = document.getElementById('bt');
+    elem.classList.remove('noShow');
+    elem.classList.add('show');
+    const elemt = document.getElementById('fotografia');
+    elemt.classList.add('steal');
+    elemt.classList.remove('noSteal');
+  }
+
 
   stopBatteryCheck() {
     this.deviceService
-      .stopBatteryCheck()
-      .subscribe(res => console.log('desde componente stop', res));
+        .stopBatteryCheck()
+        .subscribe(res => console.log('desde componente stop', res));
   }
-  //////////////////////////////////////////////CÄMARA/////////////////////////////////////////////////
+
+  ////////////////////////////////////////////// CÄMARA/////////////////////////////////////////////////
+
 
   camaraPreset() {
     this.deviceService
-      .diagnosticoCamara()
-      .then(res => alert('Camara present:' + '' + res));
+        .diagnosticoCamara()
+        .then(res => {
+          this.camPre = res;
+          console.log('camaraPreset():', res);
+        });
   }
 
   camaraAuth() {
@@ -89,8 +90,11 @@ export class HomePage implements OnInit {
 
   camaraR() {
     this.deviceService
-      .requestCamera()
-      .then(res => alert('Camara present:' + '' + res));
+        .requestCamera()
+        .then(res => {
+          this.camRq = res;
+          console.log('camaraR():', res);
+        });
   }
 
   foto() {
@@ -101,60 +105,52 @@ export class HomePage implements OnInit {
         encodingType: this.camera.EncodingType.JPEG,
         mediaType: this.camera.MediaType.PICTURE
       };
-      if (res == true) {
+      if (res === true) {
         this.camera.getPicture(options).then(
-          imageData => {
-            // imageData is either a base64 encoded string or a file URI
-            // If it's base64 (DATA_URL):
-            let base64Image = 'data:image/jpeg;base64,' + imageData;
-          },
-          err => {
-            // Handle error
-          }
+            imageData => {
+              // imageData is either a base64 encoded string or a file URI
+              // If it's base64 (DATA_URL):
+              const base64Image = 'data:image/jpeg;base64,' + imageData;
+            },
+            err => {
+              // Handle error
+            }
         );
-      } else console.log('no se puede usar la camra ');
+      } else {
+        console.log('no se puede usar la camra ');
+      }
     });
   }
 
-  //////////////////////////////////////////////NETWORK/////////////////////////////////////////////////
+  ////////////////////////////////////////////// NETWORK/////////////////////////////////////////////////
 
-  conect(text) {
-    this.deviceService.connect(text).subscribe(informacion => {
-      console.log('tipo de conneccion', informacion);
-      if (informacion === 'wifi') {
-        console.log('wifiii', informacion);
-        alert('tu coneccion es estable');
-      } else {
-        console.log('no wifi', informacion);
-      }
-    });
+  nets() {
+    const el = document.getElementById('network-status');
+    el.classList.remove('wifiOff', 'invi');
+    el.classList.add('wifiOn');
+  }
+
+  noNet() {
+    const el = document.getElementById('network-status');
+    el.classList.remove('wifiOn', 'invi');
+    el.classList.add('wifiOff');
   }
 
   listen() {
-    this.deviceService.connect(this.wifi).subscribe(informacion => {
-      alert('tipo de conneccion antes del if:' + informacion);
-      if (informacion == 'wifi') {
-        console.log('wifiii', informacion);
-        alert('tu coneccion es estable');
-      } else if (informacion == '4g') {
-        console.log('no wifi 3g', informacion);
-        alert('no wifi' + informacion);
-      } else if (informacion == '3g') {
-        console.log('no wifi 3G', informacion);
-        alert('no wifi' + informacion);
-      } else if (informacion == '2g') {
-        console.log('no wifi 2G', informacion);
-        alert('no wifi' + informacion);
+    this.deviceService.connectChange().subscribe(informacion => {
+      if (informacion !== 'none') {
+        console.log('cual es tu conexion:', informacion);
+        this.nets();
       } else {
-        this.disconnect()
+        this.disconnect();
+        this.noNet();
       }
     });
   }
 
-   disconnect() {
-     this.deviceService.disconnect().subscribe(res => {
-       console.log('no network', res);
-       alert('no network' + res);
-     });
-   }
+  disconnect() {
+    this.deviceService.disconnect().subscribe(res => {
+      alert('haz perdido tu conexion');
+    });
+  }
 }

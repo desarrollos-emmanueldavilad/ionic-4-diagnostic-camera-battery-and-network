@@ -1,55 +1,56 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
+<ion-content padding>
   <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>
-      Start with Ionic
-      <a
-        target="_blank"
-        rel="noopener noreferrer"
-        href="https://ionicframework.com/docs/components"
-      >
-        UI Components
-      </a>
-    </p>
+    <div class="text-center mx-auto"  text-center>
+      <h2 class="text-center mx-auto" style="color: white;">DEVICE STATUS</h2>
+    </div>
 
-    <div>Battery level {{batteryLevel}}</div>
-    <ion-button (click)=" check(50)" color="success">Battery 40</ion-button>
+    <div>
+      <ion-icon id="network-status" class="invi" name="wifi-outline"></ion-icon>
+    </div>
+  
+    <div>
+      <br />
+      <div class="jumbotron text-center mx-auto" text-center>
+        <p class="texto">
+          <span>Aqui hacemos un diagnostico del estado de la cámara del dispositivo</span>
+        </p>
+        <h3 class="display-4">Camera!</h3>
+      
+        <p class="texto">
+          Veamos si tu camara ya esta disponible para esta aplicación : {{camRq}}
+        </p>
+        <button (click)="camaraR()" class="btn btn-primary btn-xs">
+          Camara Request
+        </button>
+        <p class="texto">¿Deseas saber si tu dispositivo posee cámara?</p>
+                <p class="texto">tienes cámara: {{camPre}}</p>
 
-    <ion-button (click)="stopBatteryCheck()" color="danger">
-      Battery stop
-    </ion-button>
-
-    <br />
-    <h3>Diagnostic</h3>
-    <ion-button (click)="camaraPreset()" color="success">
-      Camara Present
-    </ion-button>
-    <ion-button (click)="camaraAuth()" color="success">
-      Camara Authorized
-    </ion-button>
-    <p>Cam authorization: {{authorization}}</p>
-    <!-- <ion-button (click)="camaraStatus()" color="success">Camara Sta</ion-button>-->
-
-    <ion-button (click)="camaraR()" color="success">Camara R</ion-button>
-
-    <ion-button (click)="foto()" color="danger">foto</ion-button>
-
-    <br />
-    <h3>Network</h3>
-    <ion-button (click)="conect('wifi')" color="success">Connect</ion-button>
+        <button (click)="camaraPreset()" class="btn btn-primary btn-xs">
+          Camara Present
+        </button>
+        <p class="texto">Veamos si tu cámara esta autorizada</p>
+        <button (click)="camaraAuth()" class="btn btn-primary btn-xs">
+          Camara Authorized
+        </button>
+        <p class="texto">Camara authorization: {{authorization}}</p>
+        <a text-center id="fotografia"
+          class="btn btn-primary btn-xs noSteal mx-auto"
+          (click)="foto()"
+          role="button"
+        >
+          toma una foto
+        </a>
+      </div>
+    </div>
   </div>
 </ion-content>
+<ion-footer>
+  <div class="alert alert-danger noShow" id="bt" role="alert">
+    <h4 class="alert-heading">Aviso!</h4>
+    <p>
+      Tu bateria esta baja algunas funcionalides de esta aplicación no estan
+      disponible si la bateria no es superior al 65%
+    </p>
+  </div>
+
+</ion-footer>

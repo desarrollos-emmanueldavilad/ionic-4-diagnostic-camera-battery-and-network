@@ -1,21 +1,29 @@
 import { Injectable } from '@angular/core';
 import { BatteryStatus } from '@ionic-native/battery-status/ngx';
 import { Network } from '@ionic-native/network/ngx';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import { Diagnostic } from '@ionic-native/diagnostic/ngx';
 import { Platform } from '@ionic/angular';
+
+export interface bat{
+  lvl: number;
+  plug: boolean;
+}
 @Injectable({
   providedIn: 'root'
 })
+
 export class DevicesStateService {
   batterySubscription: any;
-  level: number;
+  
+  level: any;
   signal: string;
   plugin: boolean;
   public batterylevel: any;
   public poorSignal: any;
   batteryData: boolean;
   subscrip: any;
+  plug: boolean;
   constructor(
     private batteryStatus: BatteryStatus,
     private network: Network,
@@ -35,20 +43,20 @@ export class DevicesStateService {
    * levelBat: este pararametro sera el numero del 1-100 que la aplicación utilizara para poder realizar eventos o obtener información cuando la bateria este en dicho numero de estado.
    */
   public checkBattery1(levelBat: number): Observable<any> {
-    return new Observable(observer => {
+    return new Observable<bat>(observer => {
       this.batteryStatus.onChange().subscribe(status => {
         if (status) {
           console.log('status battery', status);
-
-          this.level = status.level;
+          this.level = { lvl: status.level, plug :status.isPlugged};
           observer.next(this.level);
           // observer.complete()
-        } else {
-          console.log('tienes problemas con tu bateria');
+        } else {   
+      console.log('tienes problemas con tu bateria');
         }
       });
     });
   }
+
   /**
    * BATTERY Stop
    * Este método será el que la aplicación utilice para dejar de escuchar el estado de la batería
@@ -57,7 +65,6 @@ export class DevicesStateService {
     return new Observable(observer => {
       let sub = this.batteryStatus.onChange().subscribe(status => {
         if (status) {
-          console.log('stt', status);
           this.level = status.level;
           observer.next(this.level);
           // observer.complete()
@@ -82,15 +89,16 @@ export class DevicesStateService {
    * tipo: string: este pararametro sera el tipo de conexión (WIFI , CELL_2G , CELL_3G, CELL_4G) que la aplicación utilizara para poder realizar eventos o obtener información respecto a la conexión de internet
    */
 
-  public connect(tipo: string): Observable<any> {
+
+  public connectChange(tipo ?: string): Observable<any> {
     return new Observable(observer => {
-      this.network.onConnect().subscribe(status => {
-        console.log('network connected!', status);
-        //  if (this.network.type) {
+      this.network.onChange().subscribe(status => {
+        console.log('network change!', status);
         if (status) {
           this.signal = this.network.type;
           observer.next(this.signal);
         } else {
+          console.log('Network disconnected!')
           this.disconnect();
         }
         // observer.complete();
@@ -101,8 +109,8 @@ export class DevicesStateService {
   public disconnect(): Observable<any> {
     return new Observable(observer => {
       this.network.onDisconnect().subscribe(status => {
-          this.signal = status;
-          observer.next(this.signal);
+        this.signal = status;
+        observer.next(this.signal);
       });
     });
   }
@@ -145,9 +153,7 @@ export class DevicesStateService {
 
   public diagnosticoCamara(): Promise<any> {
     return new Promise<any>(resolve => {
-      console.log('antes', resolve);
       if (this.platform.is('cordova')) {
-        console.log('despues', resolve);
         resolve(this.camaraPresent());
       } else resolve(this.cameraWeb());
     });
@@ -230,7 +236,6 @@ export class DevicesStateService {
       this.diagnostic
         .requestCameraAuthorization()
         .then(res => {
-          console.log('sss', res);
           resolve(res);
         })
         .catch(err =>
